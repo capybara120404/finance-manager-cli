@@ -26,7 +26,7 @@ class CategoryServiceTest {
     }
 
     @Test
-    void testGetOrCreateCategory_WhenExists_ReturnsExisting() {
+    void testGetOrCreateCategoryWhenExistsReturnsExisting() {
         Category existing = new Category("Food");
         when(categoryRepository.findByName("Food")).thenReturn(Optional.of(existing));
 
@@ -37,7 +37,7 @@ class CategoryServiceTest {
     }
 
     @Test
-    void testGetOrCreateCategory_WhenNotExists_CreatesNew() {
+    void testGetOrCreateCategoryWhenNotExistsCreatesNew() {
         when(categoryRepository.findByName("Food")).thenReturn(Optional.empty());
 
         Category result = categoryService.getOrCreateCategory("Food");
@@ -47,13 +47,13 @@ class CategoryServiceTest {
     }
 
     @Test
-    void testGetOrCreateCategory_WithEmptyName_ThrowsException() {
+    void testGetOrCreateCategoryWithEmptyNameThrowsException() {
         assertThrows(IllegalArgumentException.class, () -> categoryService.getOrCreateCategory(" "));
         assertThrows(IllegalArgumentException.class, () -> categoryService.getOrCreateCategory(null));
     }
 
     @Test
-    void testUpdateCategory_SuccessfullyUpdatesTransactionsAndBudgets() {
+    void testUpdateCategorySuccessfullyUpdatesTransactionsAndBudgets() {
         Category oldCategory = new Category("Food");
         Category newCategory = new Category("Groceries");
 
@@ -76,7 +76,7 @@ class CategoryServiceTest {
     }
 
     @Test
-    void testUpdateCategory_WhenOldCategoryNotFound_ThrowsException() {
+    void testUpdateCategoryWhenOldCategoryNotFoundThrowsException() {
         when(categoryRepository.findByName("Unknown")).thenReturn(Optional.empty());
 
         assertThrows(NoSuchElementException.class,
@@ -84,7 +84,7 @@ class CategoryServiceTest {
     }
 
     @Test
-    void testUpdateCategory_WithEmptyNewName_ThrowsException() {
+    void testUpdateCategoryWithEmptyNewNameThrowsException() {
         Category existing = new Category("Food");
         when(categoryRepository.findByName("Food")).thenReturn(Optional.of(existing));
 
@@ -93,7 +93,7 @@ class CategoryServiceTest {
     }
 
     @Test
-    void testDeleteCategory_Success() {
+    void testDeleteCategorySuccess() {
         Category category = new Category("Leisure");
         when(categoryRepository.findByName("Leisure")).thenReturn(Optional.of(category));
 
@@ -103,7 +103,7 @@ class CategoryServiceTest {
     }
 
     @Test
-    void testDeleteCategory_NotFound_ThrowsException() {
+    void testDeleteCategoryNotFoundThrowsException() {
         when(categoryRepository.findByName("Nonexistent")).thenReturn(Optional.empty());
 
         assertThrows(NoSuchElementException.class,

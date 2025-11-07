@@ -90,7 +90,6 @@ class FileStorageServiceTest {
 
         fileStorageService.importWalletFromCSV(user, csvFilePath.toString());
 
-        // Некорректная строка пропускается, кошелёк остаётся пустым
         assertTrue(wallet.getTransactions().isEmpty());
     }
 }

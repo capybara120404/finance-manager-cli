@@ -36,10 +36,9 @@ class WalletServiceTest {
         walletService.addExpense(wallet, 90, food, "Dinner");
 
         assertEquals(1, wallet.getTransactions().size());
-        assertEquals(90, wallet.getTransactions().get(0).getAmount());
+        assertEquals(90, wallet.getTransactions().getFirst().getAmount());
         assertEquals(90, foodBudget.getSpent());
 
-        // Добавим ещё 20, чтобы превысить бюджет
         walletService.addExpense(wallet, 20, food, "Snack");
         assertEquals(110, foodBudget.getSpent());
 
@@ -72,7 +71,7 @@ class WalletServiceTest {
                 LocalDate.of(2025, 11, 6));
 
         assertEquals(1, periodTransactions.size());
-        assertEquals(t2, periodTransactions.get(0));
+        assertEquals(t2, periodTransactions.getFirst());
     }
 
     @Test
