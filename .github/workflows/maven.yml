@@ -1,4 +1,4 @@
-name: Java CI
+name: Java CI + Security
 
 on:
   push:
@@ -14,11 +14,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
       - name: Set up JDK 21
         uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: 21
+
       - name: Cache Maven packages
         uses: actions/cache@v3
         with:
@@ -26,7 +28,40 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
+
       - name: Build with Maven
         run: mvn clean install -B
+
       - name: Run tests
         run: mvn test
+
+  security:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Cache Dependency Check
+        uses: actions/cache@v3
+        with:
+          path: dependency-check
+          key: ${{ runner.os }}-dependency-check
+
+      - name: Download Dependency Check
+        if: steps.cache-dependency-check.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p dependency-check
+          curl -L -o dependency-check/dependency-check.zip https://github.com/jeremylong/DependencyCheck/releases/latest/download/dependency-check-8.5.1-release.zip
+          unzip dependency-check/dependency-check.zip -d dependency-check
+          rm dependency-check/dependency-check.zip
+
+      - name: Generate SBOM
+        run: |
+          dependency-check/bin/dependency-check.sh --project "FinanceManagerCLI" --scan . --format XML --out ./reports
+
+      - name: Upload Security Reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: dependency-check-reports
+          path: reports/
