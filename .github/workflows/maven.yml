@@ -1,4 +1,4 @@
-name: Java CI + Security
+name: Java CI with Dependency Analysis
 
 on:
   push:
@@ -11,6 +11,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -35,33 +36,25 @@ jobs:
       - name: Run tests
         run: mvn test
 
-  security:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Cache Dependency Check
-        uses: actions/cache@v3
-        with:
-          path: dependency-check
-          key: ${{ runner.os }}-dependency-check
-
       - name: Download Dependency Check
-        if: steps.cache-dependency-check.outputs.cache-hit != 'true'
         run: |
           mkdir -p dependency-check
-          curl -L -o dependency-check/dependency-check.zip https://github.com/jeremylong/DependencyCheck/releases/latest/download/dependency-check-8.5.1-release.zip
+          curl -L -o dependency-check/dependency-check.zip https://github.com/jeremylong/DependencyCheck/releases/download/v8.5.1/dependency-check-8.5.1-release.zip
           unzip dependency-check/dependency-check.zip -d dependency-check
           rm dependency-check/dependency-check.zip
 
-      - name: Generate SBOM
+      - name: Run Dependency Check
         run: |
-          dependency-check/bin/dependency-check.sh --project "FinanceManagerCLI" --scan . --format XML --out ./reports
+          chmod +x dependency-check/dependency-check.sh
+          ./dependency-check/dependency-check.sh \
+            --project "FinanceManagerCLI" \
+            --scan . \
+            --format HTML \
+            --out dependency-check-report.html
 
-      - name: Upload Security Reports
+      - name: Upload Dependency Check Report
         uses: actions/upload-artifact@v4
         with:
-          name: dependency-check-reports
-          path: reports/
+          name: dependency-check-report
+          path: dependency-check-report.html
+          retention-days: 7
