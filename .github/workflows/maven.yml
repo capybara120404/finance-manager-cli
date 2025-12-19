@@ -11,7 +11,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -22,7 +21,7 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - name: Cache Maven dependencies
+      - name: Cache Maven packages
         uses: actions/cache@v3
         with:
           path: ~/.m2/repository
@@ -41,23 +40,21 @@ jobs:
 
       - name: Download Dependency Check
         run: |
-          mkdir -p dependency-check
-          wget -q https://github.com/jeremylong/DependencyCheck/releases/download/v8.0.2/dependency-check-8.0.2-release.zip -O dependency-check/dependency-check.zip
-          unzip -q dependency-check/dependency-check.zip -d dependency-check
+          wget https://github.com/jeremylong/DependencyCheck/releases/download/v8.0.2/dependency-check-8.0.2-release.zip
+          unzip -q dependency-check-8.0.2-release.zip
+          chmod +x dependency-check/bin/dependency-check.sh
 
-      - name: Run Dependency Check
+      - name: Run Dependency Check (no update)
         run: |
-          chmod +x dependency-check/dependency-check/bin/dependency-check.sh
-          dependency-check/dependency-check/bin/dependency-check.sh \
+          ./dependency-check/bin/dependency-check.sh \
             --project "FinanceManagerCLI" \
             --scan . \
             --format "HTML" \
-            --out dependency-check-report.html
+            --out dependency-check-report.html \
+            --noupdate
 
-      - name: Upload SBOM and Reports
+      - name: Upload Dependency Check Report
         uses: actions/upload-artifact@v4
         with:
-          name: security-artifacts
-          path: |
-            target/bom.xml
-            dependency-check-report.html
+          name: dependency-check-report
+          path: dependency-check-report.html
