@@ -30,31 +30,30 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Build with Maven
+      - name: Build project
         run: mvn clean install -B
 
-      - name: Run tests
-        run: mvn test
-
       - name: Generate SBOM
-        run: mvn org.cyclonedx:cyclonedx-maven-plugin:makeAggregateBom
+        run: mvn cyclonedx:makeAggregateBom
 
       - name: Download Dependency Check
         run: |
-          wget https://github.com/jeremylong/DependencyCheck/releases/download/v8.0.2/dependency-check-8.0.2-release.zip
-          unzip dependency-check-8.0.2-release.zip
-          chmod +x dependency-check/bin/dependency-check.sh
+          mkdir -p dependency-check
+          wget -q https://github.com/jeremylong/DependencyCheck/releases/download/v8.0.2/dependency-check-8.0.2-release.zip -O dependency-check/dependency-check.zip
+          unzip -q dependency-check/dependency-check.zip -d dependency-check
+          chmod +x dependency-check/dependency-check/bin/dependency-check.sh
 
       - name: Run Dependency Check
         run: |
-          ./dependency-check/bin/dependency-check.sh \
+          ./dependency-check/dependency-check/bin/dependency-check.sh \
             --project "FinanceManagerCLI" \
             --scan . \
             --format "HTML" \
-            --out dependency-check-report.html
+            --out reports \
+            --noupdate
 
       - name: Upload Dependency Check report
         uses: actions/upload-artifact@v4
         with:
           name: dependency-check-report
-          path: dependency-check-report.html
+          path: reports/dependency-check-report.html
