@@ -11,6 +11,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -41,19 +42,18 @@ jobs:
       - name: Download Dependency Check
         run: |
           wget https://github.com/jeremylong/DependencyCheck/releases/download/v8.0.2/dependency-check-8.0.2-release.zip
-          unzip -q dependency-check-8.0.2-release.zip
+          unzip dependency-check-8.0.2-release.zip
           chmod +x dependency-check/bin/dependency-check.sh
 
-      - name: Run Dependency Check (no update)
+      - name: Run Dependency Check
         run: |
           ./dependency-check/bin/dependency-check.sh \
             --project "FinanceManagerCLI" \
             --scan . \
             --format "HTML" \
-            --out dependency-check-report.html \
-            --noupdate
+            --out dependency-check-report.html
 
-      - name: Upload Dependency Check Report
+      - name: Upload Dependency Check report
         uses: actions/upload-artifact@v4
         with:
           name: dependency-check-report
